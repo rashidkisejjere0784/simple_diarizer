@@ -237,17 +237,17 @@ class Diarizer:
             signal, fs = torchaudio.load(wav_file)
         else:
             print("Converting audio file to single channel WAV using ffmpeg...")
-            signal, fs = torchaudio.load(wavfile)
+            signal, fs = torchaudio.load(wav_file)
 
             # Resample the waveform to 16 kHz if the sample rate is different
             if fs != 16000:
-                waveform = torchaudio.transforms.Resample(orig_freq=fs, new_freq=16000)(waveform)
+                signal = torchaudio.transforms.Resample(orig_freq=fs, new_freq=16000)(signal)
                 fs = 16000  # Update sample rate to 16 kHz
             
-            # Convert to mono if the waveform has more than one channel
-            if waveform.shape[0] > 1:
+            # Convert to mono if the signal has more than one channel
+            if signal.shape[0] > 1:
                 # Average across the channels to convert to mono
-                waveform = torch.mean(waveform, dim=0, keepdim=True)
+                signal = torch.mean(signal, dim=0, keepdim=True)
 
         print("Running VAD...")
         speech_ts = self.vad(signal[0])
