@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torchaudio
 from IPython.display import Audio, display
-
+import torch
 
 ##################
 # Audio utils
@@ -32,10 +32,20 @@ def convert_wavfile(wavfile, outfile):
     """
     Converts file to 16khz single channel mono wav
     """
-    cmd = "ffmpeg -y -i {} -acodec pcm_s16le -ar 16000 -ac 1 {}".format(
-        wavfile, outfile
-    )
-    subprocess.Popen(cmd, shell=True).wait()
+    waveform, sample_rate = torchaudio.load(wavfile)
+
+    # Resample the waveform to 16 kHz if the sample rate is different
+    if sample_rate != 16000:
+        waveform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=16000)(waveform)
+        sample_rate = 16000  # Update sample rate to 16 kHz
+    
+    # Convert to mono if the waveform has more than one channel
+    if waveform.shape[0] > 1:
+        # Average across the channels to convert to mono
+        waveform = torch.mean(waveform, dim=0, keepdim=True)
+    
+    torchaudio.save(outfile, waveform, sample_rate)
+
     return outfile
 
 
