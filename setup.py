@@ -5,8 +5,8 @@ from simple_diarizer import __version__
 with open("README.md", "r") as f:
     long_description = f.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as f:
-    install_requires = f.read()
+with open("requirements.txt", "r", encoding='utf-16') as f:
+    install_requires = f.readlines()
 
 setuptools.setup(
     version=__version__,
